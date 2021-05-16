@@ -3,10 +3,10 @@ This Script needs to run on a computer which has a bluetooth module
 
 ## What it Does
 It periodically reads From the Bluetooth Server which in this case is the ESP32 and appends values to the CSV
-* NOTE - Replace <MAC Address of Device> and <UUID of Char> before using
+* NOTE - Replace (MAC Address of Device) and (UUID of Char) before using
 
 ### Includes
-* pygatt [a link](https://github.com/peplin/pygatt)
+* pygatt [link](https://github.com/peplin/pygatt)
 * time
 * csv
 
