@@ -21,12 +21,13 @@
 
 #include "dht11.h"
 
-#define GATTS_TAG "GATTS DHT11"
+#define GATTS_TAG "GATTS_DEMO"
 
 ///Declare the static function
 static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
-
+void tempHumUpdate();
 #define GATTS_SERVICE_UUID_TEST_A   0x181A
+#define GATTS_CHAR_UUID_TEST_A      <Your Own 128bit UUID>
 #define GATTS_DESCR_UUID_TEST_A     0x3333
 #define GATTS_NUM_HANDLE_TEST_A     4
 static uint8_t gatts_char_uuid128[] = <Your Own 128bit UUID>
@@ -208,6 +209,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
     
     case ESP_GATTS_READ_EVT: {
         ESP_LOGI(GATTS_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
+        tempHumUpdate();
         esp_gatt_rsp_t rsp;
         memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
         rsp.attr_value.handle = param->read.handle;
@@ -344,13 +346,9 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
     }
 }
 
-void tempAndHum(void *parameter){
-    DHT11_init(GPIO_NUM_4);
-    while(1){
-        temp = DHT11_read().temperature;
-        hum = DHT11_read().humidity;
-        vTaskDelay(10000 / portTICK_PERIOD_MS);
-    }
+void tempHumUpdate(){
+    temp = DHT11_read().temperature;
+    hum = DHT11_read().humidity;
 }
 
 void app_main(void)
@@ -364,7 +362,7 @@ void app_main(void)
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK( ret );
-
+    DHT11_init(GPIO_NUM_4);
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
 
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
@@ -410,8 +408,5 @@ void app_main(void)
     if (local_mtu_ret){
         ESP_LOGE(GATTS_TAG, "set local  MTU failed, error code = %x", local_mtu_ret);
     }
-    xTaskCreatePinnedToCore(
-        tempAndHum,"Read TempandHum",1024, NULL, 1, NULL, 1
-    );
     return;
 }
